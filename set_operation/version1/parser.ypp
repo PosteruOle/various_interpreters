@@ -53,9 +53,9 @@ instruction: ID '=' myset ';'   { skupovi[$1]=$3; }
                            }
        | CHECK NUMBER ':' myset ';' {
                                    if($4->find($2)==$4->end())
-                                      cout << "Element " << $2 << " se ne nalazi u skupu!" << endl;
+                                      cout << "Element " << $2 << " is not inside the set!" << endl;
                                    else
-                                      cout << "Element " << $2 << " se nalazi u skupu!" << endl;
+                                      cout << "Element " << $2 << " is inside the set!" << endl;
                                  }
        | CHECK myset '<' myset ';' {
                                    bool flag=true;
@@ -66,9 +66,9 @@ instruction: ID '=' myset ';'   { skupovi[$1]=$3; }
                                       }
                                    }
                                    if(flag)
-                                     cout << "Prvi navedeni skup jeste podskup drugog navedenog skupa!\n";
+                                     cout << "The first entered set is a subset of the second entered set!\n";
                                    else
-                                     cout << "Prvi navedeni skup nije podskup drugog navedenog skupa!\n";  
+                                     cout << "The first entered set is not a subset of the second entered set!\n";  
                                 }                          
        | UNIVERSE '=' myset ';' {
                                    
@@ -107,7 +107,7 @@ myset: myset UNION myset      {
                            }  
     | '~' myset             {
                              if(universe.size()==0){
-                               cerr << "Univerzalni skup jos uvek nije definisan! Ne mozemo traziti koplement nijednog skupa!\n";
+                               cerr << "Universal set has not been defined yet! So, we can't find a complemt of any set!\n";
                                exit(EXIT_FAILURE);
                              } else {
                                $$=new set<int>();
@@ -128,7 +128,7 @@ myset: myset UNION myset      {
                            }
     | ID                   { 
                              if(skupovi.find($1)==skupovi.end()){
-                               cout << "Ovaj skup jos uvek nije difinisan!" << endl;
+                               cout << "This set has not been defined yet!" << endl;
                                exit(EXIT_FAILURE);
                              } else {
                                $$=skupovi[$1];
