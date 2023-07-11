@@ -1,0 +1,79 @@
+%{
+  #include <iostream>  
+  #include <cstdlib>
+  #include <map>
+  #include <string>
+  #include <set>
+  #include <vector>
+  #include "set.hpp"
+    
+  using namespace std;
+  
+  extern int yylex();
+  
+  void yyerror(string s){
+      cerr << s << endl;
+      exit(EXIT_FAILURE);
+  }
+  map<char, set<int> *> skupovi;
+  set<int> universe;
+%}
+
+%union{
+  int x;
+  char id;
+  set<int>* skupic;
+}
+%token PRINT CHECK UNION INTERSECT DIFF ETC UNIVERSE SIZE
+
+%token<id> ID
+%token<x> NUMBER
+%type<skupic> myset mylist
+
+%start program
+
+%left UNION INTERSECT DIFF
+%right '~'
+
+%%
+
+program: program instruction        { }
+       | instruction                { }
+;
+instruction: ID '=' myset ';'       { }
+       | PRINT '(' myset ')' ';'    { }
+       | CHECK NUMBER ':' myset ';' { }
+       | CHECK myset '<' myset ';'  { }                          
+       | UNIVERSE '=' myset ';'     { }
+       | ID SIZE '(' ')' ';'        { }                                                      
+;
+myset: myset UNION myset            { }
+    | myset INTERSECT myset         { }
+    | myset DIFF myset       { }  
+    | '~' myset              { }
+    | '{' mylist '}'         { }
+    | NUMBER ETC NUMBER      { }
+    | ID                     { }	
+;
+mylist: mylist ',' NUMBER    { }
+     | NUMBER                { }
+;                       
+
+%%
+
+int main(){
+
+   //Announcement!
+   cout << "Here you can mess around with sets!\n";
+   cout << "It is allowed to use lower letter (yes, exactly one) to identify a certian set,\n";
+   cout << "but we reccomend you to use upper letter!\n";
+   cout << "Have fun! :)\n";
+
+   if(yyparse()==0){
+     cout << "Everything is okay!" << endl;
+   } else {
+     cout << "Sintax error!" << endl;
+   }
+      
+   exit(EXIT_SUCCESS);
+}
