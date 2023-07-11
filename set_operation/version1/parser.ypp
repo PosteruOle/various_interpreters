@@ -1,0 +1,165 @@
+
+%{
+  #include <iostream>  
+  #include <cstdlib>
+  #include <map>
+  #include <string>
+  #include <set>
+  #include <vector>
+  
+  using namespace std;
+  
+  extern int yylex();
+  
+  void yyerror(string s){
+      cerr << s << endl;
+      exit(EXIT_FAILURE);
+  }
+  map<char, set<int> *> skupovi;
+  set<int> universe;
+%}
+
+%union{
+  int x;
+  char id;
+  set<int>* skupic;
+}
+%token PRINT CHECK UNION INTERSECT DIFF ETC UNIVERSE SIZE
+
+
+
+%token<id> ID
+%token<x> NUMBER
+%type<skupic> myset mylist
+
+%start program
+
+%left UNION INTERSECT DIFF
+%right '~'
+
+%%
+
+program: program instruction   {}
+       | instruction           {}
+;
+instruction: ID '=' myset ';'   { skupovi[$1]=$3; }
+       | PRINT '(' myset ')' ';'    {
+                             cout << "{";
+                             auto it=$3->begin();
+                             for(it=$3->begin();it!=--$3->end();it++){
+                                cout << *it << ", ";
+                             }
+                             cout << *it << "}" << endl;
+                           }
+       | CHECK NUMBER ':' myset ';' {
+                                   if($4->find($2)==$4->end())
+                                      cout << "Element " << $2 << " se ne nalazi u skupu!" << endl;
+                                   else
+                                      cout << "Element " << $2 << " se nalazi u skupu!" << endl;
+                                 }
+       | CHECK myset '<' myset ';' {
+                                   bool flag=true;
+                                   for(auto it=$2->begin();it!=$2->end();it++){
+                                      if($4->find(*it)==$4->end()){
+                                        flag=false;
+                                        break;
+                                      }
+                                   }
+                                   if(flag)
+                                     cout << "Prvi navedeni skup jeste podskup drugog navedenog skupa!\n";
+                                   else
+                                     cout << "Prvi navedeni skup nije podskup drugog navedenog skupa!\n";  
+                                }                          
+       | UNIVERSE '=' myset ';' {
+                                   
+                                     for(auto it=$3->begin();it!=$3->end();it++){
+                                        universe.insert(*it);
+                                     }
+       
+                                }
+       | ID SIZE '(' ')' ';'    { 
+                                     set<int> *tmp=skupovi[$1]; 
+                                     cout << tmp->size() << endl; 
+                                }                                                      
+;
+myset: myset UNION myset      {
+                             $$=new set<int>();
+                             for(auto it=(*$1).begin();it!=(*$1).end();it++){
+                                (*$$).insert(*it);
+                             }
+                             for(auto it=(*$3).begin();it!=(*$3).end();it++){
+                                (*$$).insert(*it);
+                             }
+                           }
+    | myset INTERSECT myset     {
+                             $$=new set<int>();
+                             for(auto it=(*$1).begin();it!=(*$1).end();it++){
+                                if((*$3).find(*it)!=(*$3).end())
+                                   (*$$).insert(*it);
+                             } 
+                           }
+    | myset DIFF myset    {
+                             $$=new set<int>();
+                             for(auto it=$1->begin();it!=$1->end();it++){
+                                if($3->find(*it)==$3->end())
+                                   $$->insert(*it);
+                             }
+                           }  
+    | '~' myset             {
+                             if(universe.size()==0){
+                               cerr << "Univerzalni skup jos uvek nije definisan! Ne mozemo traziti koplement nijednog skupa!\n";
+                               exit(EXIT_FAILURE);
+                             } else {
+                               $$=new set<int>();
+                               for(auto it=universe.begin();it!=universe.end();it++){
+                                  if($2->find(*it)==$2->end())
+                                    $$->insert(*it);
+                               }
+                             }
+                           }
+    | '{' mylist '}'        {
+                             $$=$2;
+                           }
+    | NUMBER ETC NUMBER         { 
+                             $$=new set<int>();
+                             for(int i=$1;i<=$3;i++){
+                                (*$$).insert(i);
+                             }
+                           }
+    | ID                   { 
+                             if(skupovi.find($1)==skupovi.end()){
+                               cout << "Ovaj skup jos uvek nije difinisan!" << endl;
+                               exit(EXIT_FAILURE);
+                             } else {
+                               $$=skupovi[$1];
+                             } 
+                           }	
+;
+mylist: mylist ',' NUMBER      { 
+                             $1->insert($3);
+                             $$=$1;
+                           }
+     | NUMBER                { 
+                             $$=new set<int>();
+                             $$->insert($1);
+                           }
+;                       
+
+%%
+
+int main(){
+
+   //Announcement!
+   cout << "Here you can mess around with sets!\n";
+   cout << "It is allowed to use lower letter (yes, exactly one) to identify a certian set,\n";
+   cout << "but we reccomend you to use upper letter!\n";
+   cout << "Have fun! :)\n";
+
+   if(yyparse()==0){
+     cout << "Everything is okay!" << endl;
+   } else {
+     cout << "Sintax error!" << endl;
+   }
+      
+   exit(EXIT_SUCCESS);
+}
