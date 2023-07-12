@@ -1,4 +1,3 @@
-
 %{
   #include <iostream>
   #include <cstdlib>
@@ -7,6 +6,7 @@
   #include <stack>
   #include <queue>
   #include <string>
+  #include "graph.hpp"
    
   using namespace std;
 
@@ -16,9 +16,22 @@
      cerr << s << "!\n";
      exit(EXIT_FAILURE);
   }
+  
+  template<typename Base, typename T>
+  inline bool instanceof(const T *ptr) {
+    return dynamic_cast<const Base*>(ptr) != nullptr;
+  }
+  
+  map<string, vector<vector<int>>*> edges;
+  map<string, Graph*> graphs;
 %}
 
-%token ID GRAPH ASSIGN ADDEDGE ADDNODE SHOWNEIGHBORS EXIT
+%union{
+string* id;
+int x;
+}
+
+%token ID GRAPH ASSIGN ADDEDGE ADDNODE SHOWNEIGHBORS EXIT INFO DFS BFS DIJKSTRA NUMBER
 
 %start program
 
@@ -28,11 +41,22 @@ program: program instruction '\n'    { }
        | instruction         { }
 ;
 
-instruction: ID ASSIGN GRAPH '(' ID ')' ';' { }
-           | ID ADDNODE '(' ID ')' ';'      { }
-           | ID ADDEDGE '(' ID ',' ID')' ';'  { }
-           | ID SHOWNEIGHBORS '(' ')' ';'   { }
-           | EXIT                           { cout << "The program will terminate!\n"; exit(EXIT_SUCCESS); }
+instruction:  ID ASSIGN adjacency_list ';'    { edges[*$1]=$3; } 
+           |  ID ASSIGN GRAPH '(' ')' ';'     { graphs[*$1]=new Graph(); }
+           |  ID ASSIGN GRAPH '(' ID ')' ';'  { 
+                                                vector<vector<int>>* adj_list=edges[*$5]; 
+                                                graph[*$1]=new Graph(*adj_list);
+                                              }
+           | ID ADDNODE '(' ID ')' ';'        { }
+           | ID ADDEDGE '(' ID ',' ID ')' ';' { }
+           | ID SHOWNEIGHBORS '(' ')' ';'     { }
+           | EXIT                             { cout << "The program will terminate!\n"; exit(EXIT_SUCCESS); }
+           | ID INFO ';'                      { }
+           | ID DFS '(' NUMBER ')' ';'        { }
+           | ID BFS '(' NUMBER ')' ';'        { }
+           | ID DIJKSTRA '(' NUMBER ')' ';'   { }
+;
+adjacancy_list: 
 ;           
 
 %%
