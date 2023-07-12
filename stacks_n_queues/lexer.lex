@@ -38,7 +38,7 @@ _[a-zA-Z][a-zA-Z0-9_]*  {
                      }
 [ \t\n]              { }
 .                    {
-                       cout << "Leksicka greska! Neprepoznat token!\n";
+                       cout << "Leksicka greska! Neprepoznat token: " << *yytext << "!\n";
                        exit(EXIT_FAILURE);
                      }
 
