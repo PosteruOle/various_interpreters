@@ -1,0 +1,152 @@
+%{
+ 
+#include<iostream>
+#include<string>
+#include<cstdio>
+#include<cstdlib>
+#include<map>
+#include "node.h"
+#define YYDEBUG 1
+
+using namespace std;
+
+void yyerror(string s){
+    cerr<<s<<endl;
+    exit(EXIT_FAILURE);
+
+}
+
+map<string,pair<int,int>> tablica;
+int pom=8;
+extern int yylex();
+%}
+
+%token int_token if_token else_token return_token main_token id_token num_token
+  
+%union{
+  
+  char c;
+  string *s;
+  int i;
+  struct node *p;
+  struct condition *r;
+}
+%type<s> id_token
+%type<i> num_token
+%type<r> uslov
+%type<p> E naredbe telo naredba deklaracija clan niz grananje dodela
+%left '+' '-'
+%left '*' '/' '%'
+ 
+%%
+Program: int_token main_token '(' ')' '{'  telo  '}'  { 
+		$6->action();
+	}
+	;
+
+telo: naredbe  return_token num_token ';' {
+		node *n= makeNodeRet($3);
+		$1->dodajNaredbu(n);
+		$$=$1;  
+ 	}
+	;
+
+
+naredbe: naredbe naredba {
+		 $1->dodajNaredbu($2);
+		 $$=$1;
+   	}
+	| naredba { 
+   		$$=makeNodeNaredbe();
+   		$$->dodajNaredbu($1);
+       }
+	; 
+ 
+naredba: E ';' { $$=$1; }
+	| deklaracija ';' { $$=$1; }
+	| grananje { $$=$1; }
+	| dodela ';' { $$=$1; }
+        ;
+ 
+dodela: id_token '=' E {
+	 auto it=tablica.find(*$1);
+            if(it!=tablica.end())  
+	   	$$=makeNodeDodela((*$1).c_str(), $3,tablica[*$1].first);
+      	    else
+ 	    	yyerror("Nedeklarisana promenljiva");
+      } 
+      ;
+deklaracija : int_token niz{
+			$$=$2;
+	    }
+	    ; 
+niz: niz ',' clan {
+	 $1->dodajNaredbu($3);
+	 $$=$1;
+   }
+   | clan {
+   	$$=makeNodeNaredbe();
+   	$$->dodajNaredbu($1);
+   }   
+   ;
+   
+clan: id_token{ 
+    		$$=makeNodeDekl((*$1).c_str(),pom,0);
+		tablica[*$1]=make_pair(pom,0);
+    		pom+=8; 
+    }
+    | id_token '=' num_token {
+    		$$=makeNodeDekl((*$1).c_str(),pom,$3);
+    		tablica[*$1]=make_pair(pom,$3);
+    		pom+=8;
+    }
+    ; 
+ 
+E: E '+' E { $$= makeNodeBinOperator('+',$1,$3); }
+ | E '*' E { $$= makeNodeBinOperator('*',$1,$3); }
+ | E '-' E { $$= makeNodeBinOperator('-',$1,$3); } 
+ | E '/' E { $$= makeNodeBinOperator('/',$1,$3); }
+ | E '%' E { $$= makeNodeBinOperator('%',$1,$3); }
+ | num_token { $$= makeNodeConst ($1); }
+ | id_token { 
+	auto it=tablica.find(*$1);
+            if(it!=tablica.end())
+ 		$$= makeNodeVar((*$1).c_str(),tablica[*$1].first,tablica[*$1].second);
+ 	    else
+ 	    	yyerror("Nedeklarisana promenljiva");
+ }	
+ ;
+            
+grananje: if_token '(' uslov ')' '{'  naredbe  '}'  else_token '{'  naredbe  '}' {
+
+		$$=makeNodeIfElse($3,$6,$10);
+	}
+	| if_token '(' uslov ')' '{' naredbe '}' {
+		
+		$$=makeNodeIf($3,$6);
+	
+	} 
+	;
+uslov: E '=''=' E {
+     
+     	$$=makeCondition('=', $1, $4);	
+     }
+     | E '>' E {
+     	$$=makeCondition('>', $1, $3);
+     }
+     | E '<' E {
+     	$$=makeCondition('<', $1, $3);
+     }
+     | E {
+     	$$=makeCondition('n',$1,NULL); 
+     }
+     ;
+%%
+ 
+int main(){
+   //yydebug=1;
+   
+   yyparse();
+   
+   return 0;
+}
