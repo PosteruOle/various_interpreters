@@ -14,17 +14,20 @@
         exit(EXIT_FAILURE);
     }
 
+    map<string, vector<int>> table;
+
     void initialization(){ 
 
     }
 
     void deinitialization(){
-        
+        cout << "We will now deallocate all the heap memory that was used for storing polynomials!\n";
+        for(auto it=table.begin();it!=table.end();it++){
+            //delete &(*it).second;
+        }   
     }
 
     extern int yylex();
-
-    map<string, vector<int>> table;
 %}
 
 %union{
