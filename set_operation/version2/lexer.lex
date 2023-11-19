@@ -1,42 +1,46 @@
 %option noyywrap
-%option noinput
-%option nounput
 
 %{
-  #include <iostream>
-  #include <cstdlib>
-  #include <set>
-  #include <string>
-  
-  using namespace std;
-  
-  #include "parser.tab.hpp"
-  
-%}
+    #include <iostream>
+    #include <cstdlib>
+    #include <vector>
+    #include <string>
+    #include <map>
+    #include <set>
+    #include "skupovi.hpp"
+    
+    using namespace std;
 
+    #include "parser.tab.hpp"
+
+%}
 
 %%
 
-UniversalSet   { return UNIVERSE; }
-print          { return PRINT; }
-check          { return CHECK; }
-".size"        { return SIZE; }
-[a-zA-Z]          { 
-                 yylval.id=*yytext;
-                 return ID; 
-               }
-[0-9]+         { 
-                 yylval.x=atoi(yytext);
-                 return NUMBER; 
-               }
-".."           { return ETC; }
-"/\\"          { return INTERSECT; }
-"\\/"          { return UNION; }
-"\\"           { return DIFF; }
-[.,(){}:;=<~]  { return *yytext; }
-[ \n\t]        { }
-.              {
-                 cerr<< "Lexical error! Unrecognised token:" << *yytext << endl;
-               }
+"print_ALL"             { return PRINTALL; }
+"print"                 { return PRINT; }
+"check"                 { return CHECK; }
+"card"                  { return CARD; }
+"UniversalSet"          { return UNIVERSE; }
+".."                    { return TT; }
+[a-zA-Z_][a-zA-Z_0-9]*  { 
+    yylval.id=new string(yytext);
+    return ID; 
+}
+[+-]?[0-9]+             { 
+    yylval.x=atof(yytext);
+    return BROJ; 
+}
+":="                    { return DODELA; }
+[<>{};,:~]              { return *yytext; } 
+"\\\/"                  { return UNIJA; }
+"\/\\"                  { return PRESEK; }
+"\\"                    { return RAZLIKA; }
+"<>"                    { return SIMRAZLIKA; }
+[ \t\n]                 { }
+.                       {
+    cerr << "Leksicka greska! Neprepoznat token: " <<  yytext << endl;
+    exit(EXIT_FAILURE);
+}
 
 %%
