@@ -5,8 +5,8 @@ This repository contains the following colection of interpreters:
 - assembly generator
 - finite_automata - it's not actually a intepreter, but that's a concept alse presented throughout the course;
 - graph_operations
-- matrix
-- polynomials - its an interpreter that is able to process commands for creation of polynomials and commands for applying well-known operations on created polynomials
+- matrix - its an interpreter that is able to process commands for the creation of matrices and commands for applying well-known operations on created matrices
+- polynomials - its an interpreter that is able to process commands for the creation of polynomials and commands for applying well-known operations on created polynomials
 
 Here are some of the commands we would like to process and execute:
 ```
@@ -31,7 +31,7 @@ p1 != p2
 //p1[1]
 //(p1+p2)[0]
 ```
-- set_operations - its an interpreter that is able to process commands for creation of sets and commands for applying well-known operations on created sets
+- set_operations - its an interpreter that is able to process commands for the creation of sets and commands for applying well-known operations on created sets
 Here are some of the commands we would like to process and execute:
 ```
 A := {1, 2, 3, 4, 6};
