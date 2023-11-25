@@ -141,7 +141,7 @@ matrix: matrix '+' matrix    {
         cerr << "Matrice nisu odgovarajucih dimenzija!\n";
         exit(EXIT_FAILURE);
     }
-    
+
 }
 | matrix PKM matrix          { 
     vector<vector<int>> m1=*$1;
@@ -164,7 +164,22 @@ matrix: matrix '+' matrix    {
     }
     $$=&result;
 }
-| matrix '\''                { }
+| matrix '\''                { 
+    vector<vector<int>> matrix=*$1;
+    vector<vcetor<int>> result();
+    int n=matrix.size();
+    int m=matrix[0].size();
+    result.resize(n);
+    for(int i=0;i<n;i++){
+        result[i].resize(m);
+    }
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            result[j][i]=matrix[i][j];
+        }
+    }
+    $$=&result;
+}
 | '[' niz_vrsta ']'          { 
     $$=$2;
 }
