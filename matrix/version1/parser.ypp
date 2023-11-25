@@ -1,0 +1,212 @@
+%{
+    #include <iostream>
+    #include <cstdlib>
+    #include <string>
+    #include <vector>
+    #include <map>
+
+    using namespace std;
+
+    #include "parser.tab.hpp"
+
+    extern int yylex();
+
+    void yyerror(string s){
+        cerr << s << "!\n";
+        exit(EXIT_FAILURE);
+    }
+
+    map<string, vector<vector<int>>*> table;
+%}
+
+%union{
+    int x;
+    string *id;
+    vector<vector<int>>* m;
+    vector<int>* v;
+}
+
+%token DODELA PKM PRINTALL
+%token<id> ID
+%token<x> BROJ
+%type<m> niz_vrsta matrix
+%type<v> vrsta
+
+%left '+' '-'
+%left '*' PKM
+%left '\''
+
+%%
+
+program: command '\n' program  { }
+| command '\n'                 { }
+;
+
+command: matrix         { 
+    vector<vector<int>> mat=*$1;
+    int n=mat.size();
+    int m=mat[0].size();
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            cout << mat[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+| PRINTALL ';'          { 
+    for(auto it=table.begin();it!=table.end();it++){
+        cout << (*it).first << " = \n\t";
+        vector<vector<int>> mat=*(*it).second;
+        int n=mat.size();
+        int m=mat[0].size();
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                cout << mat[i][j] << " ";
+            }
+            cout << endl << "\t";
+        }
+
+    }
+}
+|                       { }
+| matrix ';'            { }
+| ID DODELA matrix      { 
+    table[*$1]=$3;
+    vector<vector<int>> mat=*$3;
+    int n=mat.size();
+    int m=mat[0].size();
+    cout << *$1 << " = \n\t";
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            cout << mat[i][j] << " ";
+        }
+        cout << endl << "\t";
+    }
+}
+| ID DODELA matrix ';'  { 
+    table[*$1]=$3;
+}
+;
+matrix: matrix '+' matrix    { 
+    vector<vector<int>> m1=*$1;
+    vector<vector<int>> m2=*$3;
+    vector<vector<int>> result;
+    int n=m1.size();
+    int m=m1[0].size();
+    if(m1.size()!=m2.size() || m1[0].size()!=m2[0].size()){
+        cerr << "Matrice nisu odgovarajucih dimenzija!\n";
+        exit(EXIT_FAILURE);
+    }
+    result.resize(n);
+    for(int i=0;i<n;i++){
+        result[i].resize(m);
+    }
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            result[i][j]=m1[i][j]+m2[i][j];
+        }
+    }
+    $$=&result;
+}
+| matrix '-' matrix          { 
+    vector<vector<int>> m1=*$1;
+    vector<vector<int>> m2=*$3;
+    vector<vector<int>> result;
+    int n=m1.size();
+    int m=m1[0].size();
+    if(m1.size()!=m2.size() || m1[0].size()!=m2[0].size()){
+        cerr << "Matrice nisu odgovarajucih dimenzija!\n";
+        exit(EXIT_FAILURE);
+    }
+    result.resize(n);
+    for(int i=0;i<n;i++){
+        result[i].resize(m);
+    }
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            result[i][j]=m1[i][j]-m2[i][j];
+        }
+    }
+    $$=&result;
+}
+| matrix '*' matrix          { 
+    vector<vector<int>> m1=*$1;
+    vector<vector<int>> m2=*$3;
+    if(m1.size()==0 || m2.size()==0){
+        cout << "Nedozvoljeno mnozenje praznih matrica!\n";
+        exit(EXIT_FAILURE);
+    }
+    if(m1[0].size()!=m2.size()){
+        cerr << "Matrice nisu odgovarajucih dimenzija!\n";
+        exit(EXIT_FAILURE);
+    }
+    
+}
+| matrix PKM matrix          { 
+    vector<vector<int>> m1=*$1;
+    vector<vector<int>> m2=*$3;
+    vector<vector<int>> result;
+    int n=m1.size();
+    int m=m1[0].size();
+    if(m1.size()!=m2.size() || m1[0].size()!=m2[0].size()){
+        cerr << "Matrice nisu odgovarajucih dimenzija!\n";
+        exit(EXIT_FAILURE);
+    }
+    result.resize(n);
+    for(int i=0;i<n;i++){
+        result[i].resize(m);
+    }
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            result[i][j]=m1[i][j]*m2[i][j];
+        }
+    }
+    $$=&result;
+}
+| matrix '\''                { }
+| '[' niz_vrsta ']'          { 
+    $$=$2;
+}
+| ID                         { 
+    if(table.find(*$1)==table.end()){
+        cerr << "Promenljiva nije definisana!\n";
+        exit(EXIT_FAILURE);
+    }
+    $$=table[*$1];
+}
+;
+
+niz_vrsta: niz_vrsta ';' vrsta  { 
+    $$=$1;
+    $$->push_back(*$3);
+}
+| vrsta                          { 
+    $$=new vector<vector<int>>();
+    $$->push_back(*$1);
+}
+; 
+
+vrsta: vrsta BROJ  { 
+    $$=$1;
+    $$->push_back($2);
+}
+| BROJ              { 
+    $$=new vector<int>();
+    $$->push_back($1);
+}
+;
+
+%%
+
+int main(int argc, char **argv){
+
+    if(yyparse()==0){
+        cout << "Everything is okay with inserted matrix operations!\n";
+    } else {
+        cerr << "Sintax error!\n";
+        exit(EXIT_FAILURE);
+    }
+
+    return 0;
+}
