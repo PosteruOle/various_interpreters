@@ -1,15 +1,42 @@
-# Various interpeters
-This repository contains the list of interpreters created during the Translation of Programming Languages course at the Faculty of Mathematics, University of Belgrade.
+# 🧮 Various Interpreters  
+**Course Project – Translation of Programming Languages**  
+*Faculty of Mathematics, University of Belgrade*
 
-This repository contains the following colection of interpreters:
-- assembly generator
-- finite_automata - it's not actually a intepreter, but that's a concept alse presented throughout the course;
-- graph_operations
-- matrix - it's an interpreter that is able to process commands for the creation of matrices and commands for applying well-known operations on created matrices
-- polynomials - it's an interpreter that is able to process commands for the creation of polynomials and commands for applying well-known operations on created polynomials
+---
 
-Here are some of the commands we would like to process and execute:
-```
+## 📚 Overview
+
+This repository contains a collection of interpreters developed as part of the **Translation of Programming Languages** course. Each interpreter focuses on a different data structure or mathematical concept, demonstrating how simple domain-specific languages (DSLs) can be created and parsed.
+
+---
+
+## 🗂 Included Interpreters
+
+### 🔧 `assembly_generator/`
+- Basic assembler code generator created during the course.
+
+### 🔄 `finite_automata/`
+- **Note**: Not an interpreter, but an important concept covered during the course involving automaton design and simulation.
+
+### 📊 `graph_operations/`
+- Handles operations and transformations on graph structures.
+
+### ➗ `matrix/`
+- Interpreter for matrix manipulation.  
+- Supports matrix creation and standard operations like addition, subtraction, and multiplication.
+
+### 📐 `polynomials/`
+- Interpreter for polynomial expressions.  
+- Supports:
+  - Polynomial creation
+  - Arithmetic operations (+, −, *)
+  - Derivatives
+  - Evaluation
+  - Equality checks
+  - Indexing
+
+**Example commands**:
+```txt
 <1, -3, 0, -1, 6>
 <1, 2, 1, 2> + <0, -1, 3>
 <1, 2, 1, 2> - <0, -1, 3>
@@ -22,18 +49,27 @@ p3 := (p1-p2)*<1>
 p3
 p1 == <1,2,3>
 p1 != p2
-
-//p1'
 (p1+p2)'- <1, 1>'
-//$p1|3
-//$p1+p2|2.3
-//<1, 2> + $p1+p2|2.3
-//p1[1]
-//(p1+p2)[0]
+
+// p1'
+// $p1|3
+// $p1+p2|2.3
+// <1, 2> + $p1+p2|2.3
+// p1[1]
+// (p1+p2)[0]
 ```
-- set_operations - it's an interpreter that is able to process commands for the creation of sets and commands for applying well-known operations on created sets
-Here are some of the commands we would like to process and execute:
-```
+
+### 🧮 `set_operations/`
+- Interpreter for working with mathematical sets.  
+- Supports:
+  - Set creation
+  - Union, intersection, difference
+  - Complement
+  - Membership and subset checks
+  - Cardinality
+
+**Example commands**:
+```txt
 A := {1, 2, 3, 4, 6};
 B:={2, 4, 6, 8, 10};
 print A;
@@ -57,5 +93,15 @@ A:=~A;
 card A;
 check A < B;
 ```
-  
-- stacks_n_queues - it's an interpreter that is able to process commands for the creation of stacks and queues and commands for applying well-known operations on whichever of those two data structures are created
+
+### 📦 `stacks_n_queues/`
+- Interpreter for stacks and queues.  
+- Supports creating and manipulating stack/queue structures using basic commands.
+
+---
+
+## 📌 Summary
+
+Each interpreter is built to recognize and process custom syntax, offering insights into how compilers and interpreters work behind the scenes. This project serves both as an educational tool and as a base for more complex language design experiments.
+
+---
